@@ -126,5 +126,6 @@ namespace Hms.Service
     public interface IUserService
     {
         Task<ResponseViewModel> CreateUserAsync(SignUpViewModel signUpVm);
+        Task<ResponseViewModel> CreateAdminAsync(SignUpViewModel signUpVm);
     }
 }

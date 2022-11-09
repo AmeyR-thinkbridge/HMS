@@ -31,7 +31,7 @@ namespace HMS._1._0.Controllers
 
             if (!signUpViewModel.IsCustomer)
             {
-                var result = await _userService.CreateUserAsync(signUpViewModel);
+                var result = await _userService.CreateAdminAsync(signUpViewModel);
                 if (result.HasError)
                 {
                     return BadRequest(result);
