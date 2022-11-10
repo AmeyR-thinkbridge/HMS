@@ -13,7 +13,7 @@ namespace Hms.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int FeedbackId { get; set; }
-        [MaxLength(100)]
+        [MaxLength(100),Column("Rating"),Range(1,5)]
         public short? Description { get; set; }
         [ForeignKey("User")]
         public string? UserID { get; set; }

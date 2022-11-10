@@ -71,7 +71,7 @@ namespace HMS._1._0.Controllers
             var result = _tableService.Delete(table);
             if (result)
             {
-                return Ok($"table with {id} is deleted");
+                return Ok($"table with id {id} is deleted");
             }
             return BadRequest();
         }

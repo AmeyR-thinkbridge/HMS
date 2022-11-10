@@ -69,7 +69,7 @@ namespace HMS._1._0.Controllers
             var result = _dishCategoryService.Delete(dishCategroy);
             if (result)
             {
-                return Ok($"table with {id} is deleted");
+                return Ok($"dishcategory with id {id} is deleted");
             }
             return BadRequest();
         }

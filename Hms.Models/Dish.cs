@@ -19,8 +19,6 @@ namespace Hms.Models
         public double MRP { get; set; }
         [ForeignKey("DishCategroy")]
         public int? DishCategroyId { get; set; }
-        public virtual DishCategroy? DishCategroy { get; set; }
-
-        
+        public virtual DishCategroy? DishCategroy { get; set; }       
     }
 }
