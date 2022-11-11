@@ -27,6 +27,8 @@ namespace Hms.Service
             _signInManager = signInManager;
             _roleManager = roleManager;
         }
+
+        //Todo : Remove Role Creation Code and Combine both methods (for admin and user).
         public async Task<ResponseViewModel> CreateUserAsync(SignUpViewModel signUpVm)
         {
             ResponseViewModel responseViewModel = new ResponseViewModel();
@@ -42,13 +44,8 @@ namespace Hms.Service
                 };
 
                 var result = await _userManager.CreateAsync(user, signUpVm.Password);
-                if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
-                    await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
 
-                if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-                    await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-
-                if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
+                if (await _roleManager.RoleExistsAsync(UserRoles.User))
                     await _userManager.AddToRoleAsync(user, UserRoles.User);
 
                 if (result.Succeeded)
@@ -89,11 +86,6 @@ namespace Hms.Service
                 };
 
                 var result = await _userManager.CreateAsync(user, signUpVm.Password);
-                if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
-                    await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
-
-                if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-                    await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
 
                 if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
                     await _userManager.AddToRoleAsync(user, UserRoles.Admin);

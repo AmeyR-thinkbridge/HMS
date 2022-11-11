@@ -18,7 +18,8 @@ namespace Hms.Service
         {
             _repository = repository;
         }
-
+        //Todo : Use DTO or viewmodel to return data as a response and accept data.
+        //Todo : Use await _repository.GetByID<DishCategroy>(id); before updating we need to check if that entity exsists or not.
         public async Task<DishCategroy> AddDishCategoryAsync(DishCategoryViewModel dishCategoryViewModel)
         {
             var dishCategory = new DishCategroy()
@@ -31,9 +32,9 @@ namespace Hms.Service
 
             return dishCategory;
         }
-        public Task<List<DishCategroy>> GetAllDishCategories()
+        public async Task<List<DishCategroy>> GetAllDishCategories()
         {
-            var lstDishCategory = _repository.FindAll<DishCategroy>().ToListAsync();
+            var lstDishCategory = await _repository.FindAll<DishCategroy>().ToListAsync();
             return lstDishCategory;
         }
 

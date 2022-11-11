@@ -45,6 +45,12 @@ namespace Hms.Service
             return dish;
         }
 
+        public double GetDishMrpByID(int id)
+        {
+            var dishes = _repository.Get<Dish>(id);
+            return dishes.MRP;
+        } 
+
         public async Task<bool> UpdateDishAsync(int id,int dishCategoryId, DishViewModel dishViewModel)
         {
             var dish = new Dish()
@@ -79,5 +85,6 @@ namespace Hms.Service
         Task<Dish> GetDishbyID(int id);
         Task<bool> UpdateDishAsync(int id, int dishCategoryId, DishViewModel dishViewModel);
         bool Delete(Dish dish);
+        double GetDishMrpByID(int id);
     }
 }

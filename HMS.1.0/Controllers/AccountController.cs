@@ -15,34 +15,28 @@ namespace HMS._1._0.Controllers
         {
             _userService = userService;
         }
-
-        [HttpPost("signup")]
+        //Todo : Generic todo fix naming convention. 
+        [HttpPost("SignUp")]
         public async Task<IActionResult> SignUp([FromBody] SignUpViewModel signUpViewModel)
         {
-            if (signUpViewModel.IsCustomer)
-            {
-                var result = await _userService.CreateUserAsync(signUpViewModel);
-                if (result.HasError)
-                {
-                    return BadRequest(result);
-                }
-                return Ok(result);
-            }
 
             if (!signUpViewModel.IsCustomer)
             {
-                var result = await _userService.CreateAdminAsync(signUpViewModel);
-                if (result.HasError)
+                var result1 = await _userService.CreateAdminAsync(signUpViewModel);
+                if (result1.HasError)
                 {
-                    return BadRequest(result);
+                    return BadRequest(result1);
                 }
-                return Ok(result);
+                return Ok(result1);
             }
 
+            var result = await _userService.CreateUserAsync(signUpViewModel);
+            if (result.HasError)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
 
-
-
-            return BadRequest();
         }
     }
 }

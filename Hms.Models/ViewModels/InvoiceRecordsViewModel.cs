@@ -12,6 +12,9 @@ namespace Hms.Models.ViewModels
     {
         [Required(ErrorMessage ="Please enter the units")]
         public double Units { get; set; }
-        public int? DishId { get; set; }
+        public double? Total { get; set; }
+        [Required(ErrorMessage ="Please enter the dishId")]
+        public int DishId { get; set; }
+        public int? InvoiceId { get; set; }
     }
 }

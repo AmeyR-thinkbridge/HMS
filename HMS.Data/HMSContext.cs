@@ -2,13 +2,6 @@
 using HMS.Data.ModelConfigurations;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HMS.Data
 {
@@ -20,10 +13,12 @@ namespace HMS.Data
         }
 
         public DbSet<Table> Table { get; set; }
+        //Todo : Change spelling of DishCategroy
         public DbSet<DishCategroy> DishCategroy { get; set; }
         public DbSet<Dish> Dish { get; set; }
         public DbSet<FeedBack> FeedBack { get; set; }
         public DbSet<Invoice> Invoice { get; set; }
+        //ToDo : change name to invoice record since irt represents single entity
         public DbSet<InvoiceRecords> InvoiceRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)

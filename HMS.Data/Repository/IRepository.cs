@@ -12,6 +12,7 @@ namespace HMS.Data.Repository
         IQueryable<T> FindAll<T>() where T : class;
         IQueryable<T> FindByCondition<T>(Expression<Func<T, bool>> expression) where T : class;
         Task<T> GetByID<T>(int id) where T : class;
+        T Get<T>(int id) where T : class;
         Task Create<T>(T entity) where T : class;
         void Update<T>(T entity) where T : class;
         void Delete<T>(T entity) where T : class;

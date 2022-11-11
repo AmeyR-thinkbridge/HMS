@@ -13,6 +13,7 @@ namespace Hms.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int FeedbackId { get; set; }
+        //Todo : Either make it string or completely change it to number.
         [MaxLength(100),Column("Rating"),Range(1,5)]
         public short? Description { get; set; }
         [ForeignKey("User")]

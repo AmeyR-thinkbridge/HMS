@@ -22,5 +22,7 @@ namespace Hms.Models
         public string? UserId { get; set; }
         public virtual User? User { get; set; }
         public virtual ICollection<InvoiceRecords>? InvoiceRecords { get; set; }
+
+        //ToDo : add invoice total field
     }
 }

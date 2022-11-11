@@ -17,6 +17,8 @@ namespace HMS._1._0.Controllers
             _feedBackService = feedBackService;
         }
 
+        //Todo : Add proper routes to all apis'
+
         [HttpPost("{userId}/Add")]
         public async Task<IActionResult> AddFeedback([FromRoute] string userId, [FromBody] FeedBackViewModel feedBackViewModel)
         {
@@ -51,11 +53,13 @@ namespace HMS._1._0.Controllers
 
             return BadRequest();
         }
+        
+        //Todo : Move Id and UserId into feedBackViewModel [fromBody]
 
         [HttpPut("Update/{id}/{userId}")]
         public async Task<IActionResult> UpdateFeedBack([FromRoute] int id, [FromRoute] string userId, [FromBody] FeedBackViewModel feedBackViewModel)
         {
-            var result = await _feedBackService.UpdateDishAsync(id, userId, feedBackViewModel);
+            var result = await _feedBackService.UpdateFeedBackAsync(id, userId, feedBackViewModel);
             if (result)
             {
                 return Ok(feedBackViewModel);
@@ -66,8 +70,8 @@ namespace HMS._1._0.Controllers
         [HttpDelete("Delete/{id}")]
         public async Task<IActionResult> DeleteFeedBack([FromRoute] int id)
         {
-            var dish = await _feedBackService.GetFeedBackbyID(id);
-            var result = _feedBackService.Delete(dish);
+            var feedBack = await _feedBackService.GetFeedBackbyID(id);
+            var result = _feedBackService.Delete(feedBack);
             if (result)
             {
                 return Ok($"Your feedback is deleted");

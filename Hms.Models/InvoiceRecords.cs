@@ -18,6 +18,7 @@ namespace Hms.Models
         [ForeignKey("Dish")]
         public int? DishId { get; set; }
         public virtual Dish? Dish { get; set; }
+        public int? InvoiceId { get; set; }
 
     }
 }

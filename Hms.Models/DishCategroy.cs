@@ -16,6 +16,8 @@ namespace Hms.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int CategoryId { get; set; }
+
+        //ToDo: Change name to categoryname max change in index as well
         public string? CategoryCode { get; set; }
         [MaxLength(100)]
         public string? Description { get; set; }

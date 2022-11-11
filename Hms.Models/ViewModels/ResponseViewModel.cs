@@ -11,5 +11,6 @@ namespace Hms.Models.ViewModels
         public string? ErrorCode { get; set; }
         public string? ErrorDescription { get; set; }
         public bool HasError { get; set; }
+        //Todo: add field success message.
     }
 }

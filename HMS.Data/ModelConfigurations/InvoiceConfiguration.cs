@@ -22,6 +22,11 @@ namespace HMS.Data.ModelConfigurations
                .HasOne(s => s.User)
                .WithMany()
                .OnDelete(DeleteBehavior.Restrict);
+
+            builder
+                .HasMany(s => s.InvoiceRecords)
+                .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

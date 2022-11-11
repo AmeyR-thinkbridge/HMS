@@ -15,7 +15,7 @@ namespace HMS.Data.ModelConfigurations
         {
             builder
                .HasOne(s => s.Dish)
-               .WithOne()
+               .WithMany()
                .OnDelete(DeleteBehavior.Restrict);
         }
     }

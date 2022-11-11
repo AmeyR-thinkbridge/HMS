@@ -18,10 +18,13 @@ namespace HMS.Data.Repository
             _hmsContext = hmsContext;
         }
 
+        //Todo : Create seprate methods async and normal for same function.
+
         public IQueryable<T> FindAll<T>() where T : class => _hmsContext.Set<T>().AsNoTracking();
         public IQueryable<T> FindByCondition<T>(Expression<Func<T, bool>> expression) where T : class =>
             _hmsContext.Set<T>().Where(expression).AsNoTracking();
         public async Task<T> GetByID<T>(int id) where T : class => await _hmsContext.Set<T>().FindAsync(id);
+        public T Get<T>(int id) where T : class => _hmsContext.Set<T>().Find(id);
         public async Task Create<T>(T entity) where T : class => await _hmsContext.Set<T>().AddAsync(entity);
         public void Update<T>(T entity) where T : class => _hmsContext.Set<T>().Update(entity);
         public void Delete<T>(T entity) where T : class => _hmsContext.Set<T>().Remove(entity);

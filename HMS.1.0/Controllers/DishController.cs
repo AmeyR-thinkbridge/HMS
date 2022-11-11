@@ -16,6 +16,8 @@ namespace HMS._1._0.Controllers
             _dishService = dishService;
         }
 
+        //Todo : User Friendly error messages in the api response.
+
         [HttpPost("AddDish/{dishCategoryId}")]
         public async Task<IActionResult> AddDish([FromRoute] int dishCategoryId, [FromBody] DishViewModel dishViewModel)
         {
@@ -70,7 +72,7 @@ namespace HMS._1._0.Controllers
             var result = _dishService.Delete(dish);
             if (result)
             {
-                return Ok($"Dish with id {id} is deleted");
+                return Ok($"Dish is deleted");
             }
             return BadRequest();
         }
