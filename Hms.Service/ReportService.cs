@@ -43,6 +43,7 @@ namespace Hms.Service
 
         public async Task<double> DishesServedPerDay(DateTime date)
         {
+            //ToDo : Return list of dishes served in a day.
             var invoicesForToday = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date.Equals(date)).ToListAsync();
             List<InvoiceRecords> invRecords = new List<InvoiceRecords>();
             foreach (var record in invoicesForToday)
@@ -105,6 +106,21 @@ namespace Hms.Service
 
             return dish.Name;
         }
+        public async Task<IEnumerable> CostliestDishByCategory()
+        {
+            var dishlst = await _repository.FindAll<Dish>().ToListAsync();
+            var categoryList = await _repository.FindAll<DishCategroy>().ToListAsync();
+            var dishbycategories = from d in dishlst
+                                   join c in categoryList on d.DishCategroyId equals c.CategoryId
+                                   group d by c.Description into cdg
+                                   select new
+                                   {
+                                       Category = cdg.Key,
+                                       Dishes = cdg.OrderByDescending(l=>l.MRP)
+                                   };
+
+            return dishbycategories;
+        }
 
         public async Task<string> CheapestDish()
         {
@@ -112,6 +128,22 @@ namespace Hms.Service
             var dish = dishlst.MinBy(l => l.MRP);
 
             return dish.Name;
+        }
+
+        public async Task<IEnumerable> CheapestDishByCategory()
+        {
+            var dishlst = await _repository.FindAll<Dish>().ToListAsync();
+            var categoryList = await _repository.FindAll<DishCategroy>().ToListAsync();
+            var dishbycategories = from d in dishlst
+                                   join c in categoryList on d.DishCategroyId equals c.CategoryId
+                                   group d by c.Description into cdg
+                                   select new
+                                   {
+                                       Category = cdg.Key,
+                                       Dishes = cdg.OrderBy(l => l.MRP)
+                                   };
+
+            return dishbycategories;
         }
 
         public async Task<int> TotalNumberOfCustomerVisits()
@@ -284,7 +316,9 @@ namespace Hms.Service
         Task<int> TotalNumberOfCustomerVisits();
         Task<string> MostOrderedDish();
         Task<string> CostliestDish();
+        Task<IEnumerable> CostliestDishByCategory();
         Task<string> CheapestDish();
+        Task<IEnumerable> CheapestDishByCategory();
         Task<IEnumerable> InvoiceStatusReport();
         Task<IEnumerable> OrdersByCategory();
         Task<IEnumerable> OrdersByDishAndCategory();

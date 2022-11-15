@@ -82,10 +82,24 @@ namespace HMS._1._0.Controllers
             return Ok(res);
         }
 
+        [HttpGet("CostliestDishByCategory")]
+        public async Task<IActionResult> CostliestDishByCategory()
+        {
+            var res = await _reportService.CostliestDishByCategory();
+            return Ok(res);
+        }
+
         [HttpGet("CheapestDish")]
         public async Task<IActionResult> CheapestDish()
         {
             var res = await _reportService.CheapestDish();
+            return Ok(res);
+        }
+
+        [HttpGet("CheapestDishByCategory")]
+        public async Task<IActionResult> CheapestDishByCategory()
+        {
+            var res = await _reportService.CheapestDishByCategory();
             return Ok(res);
         }
 
