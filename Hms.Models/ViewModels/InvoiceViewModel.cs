@@ -10,6 +10,9 @@ namespace Hms.Models.ViewModels
 {
     public class InvoiceViewModel
     {
+        public int? Id { get; set; }
+        [Required(ErrorMessage ="Please enter UserId")]
+        public string UserId { get; set; }
         public DateTime InvoiceDate { get; set; }
         public string? Status { get; set; }
         [Required(ErrorMessage ="Please enter the TableId")]

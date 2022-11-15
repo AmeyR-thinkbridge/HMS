@@ -24,10 +24,10 @@ namespace HMS._1._0.Controllers
             _dishService = dishService;
         }
 
-        [HttpPost("{userId}/GenerateInvoice")]
-        public async Task<IActionResult> AddInvoiceAndRecords([FromRoute] string userId, [FromBody] InvoiceViewModel invoiceViewModel)
+        [HttpPost("GenerateInvoice")]
+        public async Task<IActionResult> AddInvoiceAndRecords([FromBody] InvoiceViewModel invoiceViewModel)
         {
-            var invResult = await _invoiceService.AddInvoiceAsync(userId, invoiceViewModel);
+            var invResult = await _invoiceService.AddInvoiceAsync(invoiceViewModel);
 
             foreach (var record in invoiceViewModel.InvoiceRecords)
             {
@@ -45,11 +45,11 @@ namespace HMS._1._0.Controllers
 
         //Todo : give name UpdateInvoiceAndRecords in the route and accept fields from body.
 
-        [HttpPut("{userId}/{InvoiceId}/Update")]
-        public async Task<IActionResult> UpdateInvoiceAndRecords([FromRoute] string userId,[FromRoute] int InvoiceId, [FromBody] InvoiceViewModel invoiceViewModel)
+        [HttpPut("UpdateInvoiceAndRecords")]
+        public async Task<IActionResult> UpdateInvoiceAndRecords([FromBody] InvoiceViewModel invoiceViewModel)
         {
-            var invResult = await _invoiceService.UpdateInvoiceAsync(InvoiceId, userId, invoiceViewModel);
-            var lstInvoiceRecord = _invoiceRecordsService.GetInvoiceRecordsByInvoiceId(InvoiceId);
+            var invResult = await _invoiceService.UpdateInvoiceAsync(invoiceViewModel);
+            var lstInvoiceRecord = _invoiceRecordsService.GetInvoiceRecordsByInvoiceId(invoiceViewModel.Id!.Value);
             foreach (var record in lstInvoiceRecord)
             {
                 _invoiceRecordsService.Delete(record);

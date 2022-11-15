@@ -19,10 +19,10 @@ namespace HMS._1._0.Controllers
 
         //Todo : Add proper routes to all apis'
 
-        [HttpPost("{userId}/Add")]
-        public async Task<IActionResult> AddFeedback([FromRoute] string userId, [FromBody] FeedBackViewModel feedBackViewModel)
+        [HttpPost("Add")]
+        public async Task<IActionResult> AddFeedback([FromBody] FeedBackViewModel feedBackViewModel)
         {
-            var result = await _feedBackService.AddFeedBackAsync(userId, feedBackViewModel);
+            var result = await _feedBackService.AddFeedBackAsync(feedBackViewModel);
             if (result != null)
             {
                 return Ok(result);
@@ -53,13 +53,13 @@ namespace HMS._1._0.Controllers
 
             return BadRequest();
         }
-        
+
         //Todo : Move Id and UserId into feedBackViewModel [fromBody]
 
-        [HttpPut("Update/{id}/{userId}")]
-        public async Task<IActionResult> UpdateFeedBack([FromRoute] int id, [FromRoute] string userId, [FromBody] FeedBackViewModel feedBackViewModel)
+        [HttpPut("Update/{id}")]
+        public async Task<IActionResult> UpdateFeedBack([FromRoute] int id, [FromBody] FeedBackViewModel feedBackViewModel)
         {
-            var result = await _feedBackService.UpdateFeedBackAsync(id, userId, feedBackViewModel);
+            var result = await _feedBackService.UpdateFeedBackAsync(id, feedBackViewModel);
             if (result)
             {
                 return Ok(feedBackViewModel);

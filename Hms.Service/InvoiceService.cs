@@ -21,12 +21,12 @@ namespace Hms.Service
         }
 
         // Todo : add await to every async call.
-        public async Task<Invoice> AddInvoiceAsync(string userID, InvoiceViewModel invoiceViewModel)
+        public async Task<Invoice> AddInvoiceAsync(InvoiceViewModel invoiceViewModel)
         {
             var invoice = new Invoice()
             {
-                UserId = userID,
-                Status = InvoiceStatus.Pending,
+                UserId = invoiceViewModel.UserId,
+                Status = invoiceViewModel.Status,
                 TableId = invoiceViewModel.TableId,
                 InvoiceDate = invoiceViewModel.InvoiceDate,
             };
@@ -48,20 +48,20 @@ namespace Hms.Service
             return invoice;
         }
 
-        public async Task<List<Invoice>> GetInvoiceByUserId(string userId)
+        public async Task<List<Invoice>> GetInvoicesByUserId(string userId)
         {
             var invoicelist = await _repository.FindByCondition<Invoice>(l => l.UserId == userId).ToListAsync();
             return invoicelist;
         }
 
-        public async Task<Invoice> UpdateInvoiceAsync(int id, string UserId, InvoiceViewModel invoiceViewModel)
+        public async Task<Invoice> UpdateInvoiceAsync(InvoiceViewModel invoiceViewModel)
         {
             var invoice = new Invoice()
             {
-                InvoiceId = id,
-                UserId = UserId,
-                Status = InvoiceStatus.Pending,
-                TableId=invoiceViewModel.TableId,
+                InvoiceId = invoiceViewModel.Id!.Value,
+                UserId = invoiceViewModel.UserId,
+                Status = invoiceViewModel.Status,
+                TableId = invoiceViewModel.TableId,
                 InvoiceDate = invoiceViewModel.InvoiceDate
             };
             _repository.Update(invoice);
@@ -84,11 +84,11 @@ namespace Hms.Service
 
     public interface IInvoiceService
     {
-        Task<Invoice> AddInvoiceAsync(string userID, InvoiceViewModel invoiceViewModel);
+        Task<Invoice> AddInvoiceAsync(InvoiceViewModel invoiceViewModel);
         Task<List<Invoice>> GetAllInvoices();
         Task<Invoice> GetInvoicebyID(int id);
-        Task<List<Invoice>> GetInvoiceByUserId(string userId);
-        Task<Invoice> UpdateInvoiceAsync(int id, string UserId, InvoiceViewModel invoiceViewModel);
+        Task<List<Invoice>> GetInvoicesByUserId(string userId);
+        Task<Invoice> UpdateInvoiceAsync(InvoiceViewModel invoiceViewModel);
         bool Delete(Invoice invoice);
-    } 
+    }
 }

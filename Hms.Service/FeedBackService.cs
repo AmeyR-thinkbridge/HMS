@@ -22,12 +22,12 @@ namespace Hms.Service
 
         //Todo : Ctrl + k + D in all files for proper spacing and indentation
 
-        public async Task<FeedBack> AddFeedBackAsync(string userId, FeedBackViewModel feedBackViewModel)
+        public async Task<FeedBack> AddFeedBackAsync(FeedBackViewModel feedBackViewModel)
         {
             var feedBack = new FeedBack()
             {
                 Description = feedBackViewModel.Description,
-                UserID = userId,
+                UserID = feedBackViewModel.UserId,
             };
             await _repository.Create(feedBack);
             await _repository.SaveAsync();
@@ -53,13 +53,13 @@ namespace Hms.Service
             return feedBacklst;
         }
 
-        public async Task<bool> UpdateFeedBackAsync(int id, string userId, FeedBackViewModel feedBackViewModel)
+        public async Task<bool> UpdateFeedBackAsync(int id, FeedBackViewModel feedBackViewModel)
         {
             var feedBack = new FeedBack()
             {
                 FeedbackId = id,
                 Description = feedBackViewModel.Description,
-                UserID = userId,
+                UserID = feedBackViewModel.UserId,
             };
             _repository.Update(feedBack);
             await _repository.SaveAsync();
@@ -81,11 +81,11 @@ namespace Hms.Service
 
     public interface IFeedBackService
     {
-        Task<FeedBack> AddFeedBackAsync(string userId, FeedBackViewModel feedBackViewModel);
+        Task<FeedBack> AddFeedBackAsync(FeedBackViewModel feedBackViewModel);
         Task<List<FeedBack>> GetAllFeedBacks();
         Task<FeedBack> GetFeedBackbyID(int id);
         Task<List<FeedBack>> GetFeedBacksByUserId(string userId);
-        Task<bool> UpdateFeedBackAsync(int id, string userId, FeedBackViewModel feedBackViewModel);
+        Task<bool> UpdateFeedBackAsync(int id, FeedBackViewModel feedBackViewModel);
         bool Delete(FeedBack feedBack);
 
     }

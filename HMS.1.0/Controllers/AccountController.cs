@@ -20,17 +20,7 @@ namespace HMS._1._0.Controllers
         public async Task<IActionResult> SignUp([FromBody] SignUpViewModel signUpViewModel)
         {
 
-            if (!signUpViewModel.IsCustomer)
-            {
-                var result1 = await _userService.CreateAdminAsync(signUpViewModel);
-                if (result1.HasError)
-                {
-                    return BadRequest(result1);
-                }
-                return Ok(result1);
-            }
-
-            var result = await _userService.CreateUserAsync(signUpViewModel);
+            var result = await _userService.AddUserAsync(signUpViewModel);
             if (result.HasError)
             {
                 return BadRequest(result);

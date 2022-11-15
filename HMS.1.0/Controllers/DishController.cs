@@ -18,10 +18,10 @@ namespace HMS._1._0.Controllers
 
         //Todo : User Friendly error messages in the api response.
 
-        [HttpPost("AddDish/{dishCategoryId}")]
-        public async Task<IActionResult> AddDish([FromRoute] int dishCategoryId, [FromBody] DishViewModel dishViewModel)
+        [HttpPost("AddDish")]
+        public async Task<IActionResult> AddDish([FromBody] DishViewModel dishViewModel)
         {
-            var result = await _dishService.AddDishAsync(dishCategoryId, dishViewModel);
+            var result = await _dishService.AddDishAsync(dishViewModel);
 
             if (result != null)
             {
@@ -54,10 +54,10 @@ namespace HMS._1._0.Controllers
             return BadRequest();
         }
 
-        [HttpPut("Update/{id}/{dishCategoryID}")]
-        public async Task<IActionResult> UpdateDish([FromRoute] int id, [FromRoute] int dishCategoryID , [FromBody] DishViewModel dishViewModel)
+        [HttpPut("Update/{id}")]
+        public async Task<IActionResult> UpdateDish([FromRoute] int id, [FromBody] DishViewModel dishViewModel)
         {
-            var result = await _dishService.UpdateDishAsync(id, dishCategoryID, dishViewModel);
+            var result = await _dishService.UpdateDishAsync(id, dishViewModel);
             if (result)
             {
                 return Ok(dishViewModel);

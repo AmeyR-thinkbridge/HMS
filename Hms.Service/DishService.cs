@@ -19,13 +19,13 @@ namespace Hms.Service
             _repository = repository;
         }
 
-        public async Task<Dish> AddDishAsync(int dishCategoryId, DishViewModel dishViewModel)
+        public async Task<Dish> AddDishAsync(DishViewModel dishViewModel)
         {
             var dish = new Dish()
             {
                 Name = dishViewModel.Name,
                 MRP = dishViewModel.MRP,
-                DishCategroyId = dishCategoryId
+                DishCategroyId = dishViewModel.DishCategroyId
             };
             await _repository.Create(dish);
             await _repository.SaveAsync();
@@ -49,14 +49,14 @@ namespace Hms.Service
         {
             var dishes = _repository.Get<Dish>(id);
             return dishes.MRP;
-        } 
+        }
 
-        public async Task<bool> UpdateDishAsync(int id,int dishCategoryId, DishViewModel dishViewModel)
+        public async Task<bool> UpdateDishAsync(int id, DishViewModel dishViewModel)
         {
             var dish = new Dish()
             {
                 DishId = id,
-                DishCategroyId = dishCategoryId,
+                DishCategroyId = dishViewModel.DishCategroyId,
                 Name = dishViewModel.Name,
                 MRP = dishViewModel.MRP,
             };
@@ -80,10 +80,10 @@ namespace Hms.Service
 
     public interface IDishService
     {
-        Task<Dish> AddDishAsync(int dishCategoryId, DishViewModel dishViewModel);
+        Task<Dish> AddDishAsync(DishViewModel dishViewModel);
         Task<List<Dish>> GetAllDishes();
         Task<Dish> GetDishbyID(int id);
-        Task<bool> UpdateDishAsync(int id, int dishCategoryId, DishViewModel dishViewModel);
+        Task<bool> UpdateDishAsync(int id, DishViewModel dishViewModel);
         bool Delete(Dish dish);
         double GetDishMrpByID(int id);
     }

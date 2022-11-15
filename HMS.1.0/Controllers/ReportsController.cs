@@ -52,8 +52,9 @@ namespace HMS._1._0.Controllers
             return Ok(res);
         }
         [HttpPost("BusiestHoursPerDay")]
-        public async Task<IEnumerable> BusiestHoursPerDay(DateTime date)
+        public async Task<IEnumerable> BusiestHoursPerDay([FromBody] DateTime date)
         {
+            date = date.Date;
             var res = await _reportService.BusiestHoursPerDay(date);
 
             return res;

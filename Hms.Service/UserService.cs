@@ -29,7 +29,7 @@ namespace Hms.Service
         }
 
         //Todo : Remove Role Creation Code and Combine both methods (for admin and user).
-        public async Task<ResponseViewModel> CreateUserAsync(SignUpViewModel signUpVm)
+        public async Task<ResponseViewModel> AddUserAsync(SignUpViewModel signUpVm)
         {
             ResponseViewModel responseViewModel = new ResponseViewModel();
 
@@ -40,12 +40,15 @@ namespace Hms.Service
                     FirstName = signUpVm.FirstName,
                     LastName = signUpVm.LastName,
                     Email = signUpVm.Email,
-                    UserName = signUpVm.Email
+                    UserName = signUpVm.Email,
+                    IsCustomer = signUpVm.IsCustomer,
                 };
 
                 var result = await _userManager.CreateAsync(user, signUpVm.Password);
 
-                if (await _roleManager.RoleExistsAsync(UserRoles.User))
+                if (!signUpVm.IsCustomer)
+                    await _userManager.AddToRoleAsync(user, UserRoles.Admin);
+                else
                     await _userManager.AddToRoleAsync(user, UserRoles.User);
 
                 if (result.Succeeded)
@@ -71,53 +74,10 @@ namespace Hms.Service
             }
         }
 
-        public async Task<ResponseViewModel> CreateAdminAsync(SignUpViewModel signUpVm)
-        {
-            ResponseViewModel responseViewModel = new ResponseViewModel();
-
-            try
-            {
-                var user = new User
-                {
-                    FirstName = signUpVm.FirstName,
-                    LastName = signUpVm.LastName,
-                    Email = signUpVm.Email,
-                    UserName = signUpVm.Email
-                };
-
-                var result = await _userManager.CreateAsync(user, signUpVm.Password);
-
-                if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
-                    await _userManager.AddToRoleAsync(user, UserRoles.Admin);
-
-                if (result.Succeeded)
-                {
-                    responseViewModel.HasError = false;
-                }
-                else
-                {
-
-                    responseViewModel.HasError = true;
-                    responseViewModel.ErrorDescription = result.Errors.FirstOrDefault().Description;
-                }
-                return responseViewModel;
-            }
-
-
-            catch (Exception ex)
-            {
-                responseViewModel.HasError = true;
-                responseViewModel.ErrorCode = ex.HResult.ToString();
-                responseViewModel.ErrorDescription = ex.Message;
-                return responseViewModel;
-            }
-        }
-
     }
 
     public interface IUserService
     {
-        Task<ResponseViewModel> CreateUserAsync(SignUpViewModel signUpVm);
-        Task<ResponseViewModel> CreateAdminAsync(SignUpViewModel signUpVm);
+        Task<ResponseViewModel> AddUserAsync(SignUpViewModel signUpVm);
     }
 }
