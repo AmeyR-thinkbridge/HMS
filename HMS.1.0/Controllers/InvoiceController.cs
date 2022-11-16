@@ -32,7 +32,7 @@ namespace HMS._1._0.Controllers
             foreach (var record in invoiceViewModel.InvoiceRecords)
             {
                 record.InvoiceId = invResult.InvoiceId;
-                record.Total = _dishService.GetDishMrpByID(record.DishId) * record.Units;
+                record.Total = await _dishService.GetDishMrpByID(record.DishId) * record.Units;
             }
             var invRecordResult = await _invoiceRecordsService.AddInvoiceRecordAsync(invoiceViewModel.InvoiceRecords);
 
@@ -57,7 +57,7 @@ namespace HMS._1._0.Controllers
             foreach (var record in invoiceViewModel.InvoiceRecords)
             {
                 record.InvoiceId = invResult.InvoiceId;
-                record.Total = _dishService.GetDishMrpByID(record.DishId) * record.Units;
+                record.Total = await _dishService.GetDishMrpByID(record.DishId) * record.Units;
             }
             var invRecordResult = await _invoiceRecordsService.AddInvoiceRecordAsync(invoiceViewModel.InvoiceRecords);
 
