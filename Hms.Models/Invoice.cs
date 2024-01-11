@@ -14,6 +14,7 @@ namespace Hms.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int InvoiceId { get; set; }
         public DateTime InvoiceDate { get; set; }
+        public double? Total { get; set; }
         public string? Status { get; set; }
         [ForeignKey("Table")]
         public int? TableId { get; set; }

@@ -59,5 +59,10 @@ namespace HMS.Data.Repository
 
 
         public async Task SaveAsync() => await _hmsContext.SaveChangesAsync();
+
+        public async Task SaveBulk<T>(List<T> entity) where T : class
+        {
+            await _hmsContext.AddRangeAsync(entity);
+        }
     }
 }

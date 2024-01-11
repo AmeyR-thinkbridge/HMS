@@ -1,12 +1,10 @@
 ﻿using Hms.Models;
 using Hms.Models.ViewModels;
+using Hms.Service.Helpers;
 using HMS.Data.Repository;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using OfficeOpenXml;
 
 namespace Hms.Service
 {
@@ -24,8 +22,8 @@ namespace Hms.Service
         {
             var dishCategory = new DishCategroy()
             {
-               CategoryCode = dishCategoryViewModel.CategoryCode,
-               Description = dishCategoryViewModel.Description,
+                CategoryCode = dishCategoryViewModel.CategoryCode,
+                Description = dishCategoryViewModel.Description,
             };
             await _repository.Create(dishCategory);
             await _repository.SaveAsync();
@@ -45,7 +43,7 @@ namespace Hms.Service
 
         }
 
-        public async Task<bool> UpdateDishCategoryAsync(int id,DishCategoryViewModel dishCategoryViewModel)
+        public async Task<bool> UpdateDishCategoryAsync(int id, DishCategoryViewModel dishCategoryViewModel)
         {
             var table = new DishCategroy()
             {
@@ -69,6 +67,44 @@ namespace Hms.Service
 
             return false;
         }
+
+        public async Task<List<DishCategroy>> ConvertExcelToList(IFormFile file)
+        {
+            var list = new List<DishCategroy>();
+            using (var stream = new MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage(stream))
+                {
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                    worksheet.TrimEmptyRows();
+                    var rowcount = worksheet.Dimension.Rows;
+                    int col = 1;
+                    for (int row = 2; row <= rowcount; row++)
+                    {
+                        list.Add(new DishCategroy
+                        {
+                            CategoryCode = worksheet.Cells[row, col].Value.ToString().Trim(),
+                            Description = worksheet.Cells[row, col + 1].Value.ToString().Trim()
+                        });
+                    }
+                }
+            }
+            //var comparelist = await _repository.FindByCondition<DishCategroy>(async l=>l.CategoryCode==list.(a=>a.)).ToListAsync();
+            return list;
+        }
+
+        public async Task<bool> SaveRange(List<DishCategroy> list)
+        {
+            if (list is not null && list.Count > 0)
+            {
+                await _repository.SaveBulk(list);
+                await _repository.SaveAsync();
+                return true;
+            }
+            return false;
+        }
     }
 
     public interface IDishCategoryService
@@ -78,5 +114,7 @@ namespace Hms.Service
         Task<DishCategroy> GetDishCategorybyID(int id);
         Task<bool> UpdateDishCategoryAsync(int id, DishCategoryViewModel dishCategoryViewModel);
         bool Delete(DishCategroy dishCategroy);
+        Task<List<DishCategroy>> ConvertExcelToList(IFormFile file);
+        Task<bool> SaveRange(List<DishCategroy> list);
     }
 }

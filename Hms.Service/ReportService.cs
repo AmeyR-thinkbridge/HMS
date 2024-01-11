@@ -1,15 +1,7 @@
 ﻿using Hms.Models;
-using Hms.Models.Utility;
 using HMS.Data.Repository;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hms.Service
 {
@@ -22,81 +14,96 @@ namespace Hms.Service
             _repository = repository;
         }
 
-        public async Task<double> GetIncomeForDate(DateTime date)
+        public async Task<IEnumerable> GetIncomeForDate(DateTime startDate, DateTime endDate)
         {
-            var invoicesForToday = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date.Equals(date)).ToListAsync();
-            List<InvoiceRecords> invRecords = new List<InvoiceRecords>();
-            foreach (var record in invoicesForToday)
-            {
-                invRecords.AddRange(await _repository.FindByCondition<InvoiceRecords>(l => l.InvoiceId == record.InvoiceId).ToListAsync());
-            }
+            var invoicesForToday = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date >= startDate && l.InvoiceDate.Date <= endDate).Include(l=>l.InvoiceRecords).ToListAsync();
             var list = from i in invoicesForToday
-                       join r in invRecords on i.InvoiceId equals r.InvoiceId
+                       group i.InvoiceRecords by i.InvoiceDate.Date into grp
                        select new
                        {
-                           Total = r.Total,
+                           Date = grp.Key,
+                           Total = grp.Sum(l=>l.Sum(l=>l.Total)),
                        };
 
-            return list.Sum(l => l.Total.Value);
-
+            return list.OrderBy(l=>l.Date);
         }
 
-        public async Task<double> DishesServedPerDay(DateTime date)
+        public async Task<IEnumerable> DishesServedPerDay(DateTime startDate, DateTime endDate)
         {
             //ToDo : Return list of dishes served in a day.
-            var invoicesForToday = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date.Equals(date)).ToListAsync();
-            List<InvoiceRecords> invRecords = new List<InvoiceRecords>();
-            foreach (var record in invoicesForToday)
-            {
-                invRecords.AddRange(await _repository.FindByCondition<InvoiceRecords>(l => l.InvoiceId == record.InvoiceId).ToListAsync());
-            }
-            var list = from i in invoicesForToday
-                       join r in invRecords on i.InvoiceId equals r.InvoiceId
+            var invoicesForToday = _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date >= startDate && l.InvoiceDate.Date <= endDate).Include(l => l.InvoiceRecords);
+            var Irecords = invoicesForToday.SelectMany(l => l.InvoiceRecords!.Select(y=> new {DishId=y.DishId,Units=y.DishId}));
+            var list = from i in Irecords
+                       group i by i.DishId  into irg
                        select new
                        {
-                           Units = r.Units
+                           Dish = irg.Key,
+                           Units = irg.Sum(l => l.Units)
                        };
-            return list.Sum(l => l.Units);
+            return await list.ToListAsync();
         }
 
-        public async Task<string> BusiestTablePerDate(DateTime date)
+        public async Task<IEnumerable> BusiestTablePerDate(DateTime startDate, DateTime endDate)
         {
-            var invoicesForToday = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date.Equals(date)).ToListAsync();
+            var invoicesForToday = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date >= startDate && l.InvoiceDate.Date <= endDate).Include(l=>l.Table).ToListAsync();
             var tablelist = from i in invoicesForToday
-                            group i by i.TableId into tg
+                            group i by i.InvoiceDate.Date into dg
                             select new
                             {
-                                table = tg.Key,
-                                Count = tg.Sum(l => l.InvoiceId)
+                                Date = dg.Key,
+                                Table = from a in dg
+                                        group a by a.TableId into tg
+                                        select new 
+                                        {
+                                            TableId = tg.Key,
+                                            NumberOfCustomersOnTable = tg.Count(),
+                                        }
                             };
-            var tableid = tablelist.MaxBy(t => t.Count);
-            var table = await _repository.GetByID<Table>(tableid.table.Value);
-            return table.Description;
+            var something = from i in tablelist
+                            select new
+                            {
+                                Date = i.Date,
+                                Table = i.Table.MaxBy(l => l.NumberOfCustomersOnTable)
+                            };
+            return something;
+            
         }
 
-        public async Task<int> VisitsPerDay(DateTime date)
+        public async Task<int> VisitsPerDay(DateTime startDate, DateTime endDate)
         {
-            var invoicesForToday = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date.Equals(date)).ToListAsync();
+            var invoicesForToday = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date >= startDate && l.InvoiceDate.Date <= endDate).ToListAsync();
             return invoicesForToday.Count;
         }
 
+        public async Task<IEnumerable> VisitPerDay2(DateTime startDate, DateTime endDate)
+        {
+            var list = _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date >= startDate && l.InvoiceDate.Date <= endDate);
+            var newlist = from l in list
+                          group l by l.InvoiceDate.Date into ls
+                          select new
+                          {
+                              Date = ls.Key,
+                              Count = ls.Count()
+                          };
+            return await newlist.ToListAsync();
+        }
         public async Task<string> MostOrderedDish()
         {
-            var invrecords = await _repository.FindAll<InvoiceRecords>().ToListAsync();
+            var invrecords = _repository.FindAll<InvoiceRecords>();
             var invRecList = from i in invrecords
                              group i by i.DishId into irl
-                             select
-                             (
-                                 DishId: irl.Key,
-                                 Count: (from o in irl
-                                         select o.Units).Sum()
-                             );
+                             select new
+                             {
+                                 DishId = irl.Key,
+                                 Count = (from o in irl
+                                          select o.Units).Sum()
+                             };
 
             var record = invRecList.OrderByDescending(l => l.Count).First();
 
-            var rec = await _repository.GetByID<Dish>(record.DishId.Value);
+            var rec = await _repository.GetByID<Dish>(record.DishId!.Value);
 
-            return rec.Name;
+            return rec.Name!;
         }
 
         public async Task<string> CostliestDish()
@@ -104,22 +111,20 @@ namespace Hms.Service
             var dishlst = await _repository.FindAll<Dish>().ToListAsync();
             var dish = dishlst.MaxBy(l => l.MRP);
 
-            return dish.Name;
+            return dish!.Name!;
         }
         public async Task<IEnumerable> CostliestDishByCategory()
         {
-            var dishlst = await _repository.FindAll<Dish>().ToListAsync();
-            var categoryList = await _repository.FindAll<DishCategroy>().ToListAsync();
+            var dishlst = _repository.FindAll<Dish>().Include(l=>l.DishCategroy);
             var dishbycategories = from d in dishlst
-                                   join c in categoryList on d.DishCategroyId equals c.CategoryId
-                                   group d by c.Description into cdg
+                                   group d by d.DishCategroy!.Description into cdg
                                    select new
                                    {
                                        Category = cdg.Key,
-                                       Dishes = cdg.OrderByDescending(l=>l.MRP)
+                                       Dishes = cdg.OrderByDescending(l => l.MRP)
                                    };
 
-            return dishbycategories;
+            return await dishbycategories.ToListAsync();
         }
 
         public async Task<string> CheapestDish()
@@ -127,16 +132,14 @@ namespace Hms.Service
             var dishlst = await _repository.FindAll<Dish>().ToListAsync();
             var dish = dishlst.MinBy(l => l.MRP);
 
-            return dish.Name;
+            return dish!.Name!;
         }
 
         public async Task<IEnumerable> CheapestDishByCategory()
         {
-            var dishlst = await _repository.FindAll<Dish>().ToListAsync();
-            var categoryList = await _repository.FindAll<DishCategroy>().ToListAsync();
+            var dishlst = await _repository.FindAll<Dish>().Include(l=>l.DishCategroy).ToListAsync();
             var dishbycategories = from d in dishlst
-                                   join c in categoryList on d.DishCategroyId equals c.CategoryId
-                                   group d by c.Description into cdg
+                                   group d by d.DishCategroy!.Description into cdg
                                    select new
                                    {
                                        Category = cdg.Key,
@@ -153,69 +156,75 @@ namespace Hms.Service
             return invoicelst.Count;
         }
 
-        public async Task<double> MaxInvoiceBillPerDate(DateTime date)
+        public async Task<IEnumerable> MaxInvoiceBillPerDate(DateTime startDate, DateTime endDate)
         {
-            var invoicesForToday = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date.Equals(date)).ToListAsync();
-            List<InvoiceRecords> invRecords = new List<InvoiceRecords>();
-            foreach (var record in invoicesForToday)
-            {
-                invRecords.AddRange(await _repository.FindByCondition<InvoiceRecords>(l => l.InvoiceId == record.InvoiceId).ToListAsync());
-            }
-            var list = from i in invoicesForToday
-                       join r in invRecords on i.InvoiceId equals r.InvoiceId
-                       group r by r.InvoiceId into irl
+            var invList = _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date >= startDate && l.InvoiceDate.Date <= endDate).Include(l=>l.InvoiceRecords);
+            var list = from i in invList
                        select new
                        {
-                           Invoice = irl.Select(l => l.InvoiceId),
-                           Total = irl.Sum(l => l.Total.Value)
+                           Invoice = i.InvoiceId,
+                           Date = i.InvoiceDate.Date,
+                           InvoiceTotal = i.InvoiceRecords!.Sum(l=>l.Total!.Value)
                        };
 
-            return list.Max(l => l.Total);
+            var newlist = from i in list
+                          group i by i.Date into grp
+                          select new
+                          {
+                              Date = grp.Key,
+                              MaxTotal = grp.Max(l=>l.InvoiceTotal)
+                          };
+
+            return await newlist.ToListAsync();
         }
 
-        public async Task<double> MinInvoiceBillPerDate(DateTime date)
+        public async Task<IEnumerable> MinInvoiceBillPerDate(DateTime startDate, DateTime endDate)
         {
-            var invoicesForToday = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date.Equals(date)).ToListAsync();
-            List<InvoiceRecords> invRecords = new List<InvoiceRecords>();
-            foreach (var record in invoicesForToday)
-            {
-                invRecords.AddRange(await _repository.FindByCondition<InvoiceRecords>(l => l.InvoiceId == record.InvoiceId).ToListAsync());
-            }
-            var list = from i in invoicesForToday
-                       join r in invRecords on i.InvoiceId equals r.InvoiceId
-                       group r by r.InvoiceId into irl
+            var invList = _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date >= startDate && l.InvoiceDate.Date <= endDate).Include(l => l.InvoiceRecords);
+            var list = from i in invList
                        select new
                        {
-                           Invoice = irl.Select(l => l.InvoiceId),
-                           Total = irl.Sum(l => l.Total.Value)
+                           Invoice = i.InvoiceId,
+                           Date = i.InvoiceDate.Date,
+                           InvoiceTotal = i.InvoiceRecords!.Sum(l => l.Total!.Value)
                        };
 
-            return list.Min(l => l.Total);
+            var newlist = from i in list
+                          group i by i.Date into grp
+                          select new
+                          {
+                              Date = grp.Key,
+                              MinTotal = grp.Min(l => l.InvoiceTotal)
+                          };
+
+            return await newlist.ToListAsync();
         }
 
-        public async Task<double> AvgInvoiceBillPerDate(DateTime date)
+        public async Task<IEnumerable> AvgInvoiceBillPerDate(DateTime startDate, DateTime endDate)
         {
-            var invoicesForToday = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date.Equals(date)).ToListAsync();
-            List<InvoiceRecords> invRecords = new List<InvoiceRecords>();
-            foreach (var record in invoicesForToday)
-            {
-                invRecords.AddRange(await _repository.FindByCondition<InvoiceRecords>(l => l.InvoiceId == record.InvoiceId).ToListAsync());
-            }
-            var list = from i in invoicesForToday
-                       join r in invRecords on i.InvoiceId equals r.InvoiceId
-                       group r by r.InvoiceId into irl
+            var invList = _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date >= startDate && l.InvoiceDate.Date <= endDate).Include(l => l.InvoiceRecords);
+            var list = from i in invList
                        select new
                        {
-                           Invoice = irl.Select(l => l.InvoiceId),
-                           Total = irl.Sum(l => l.Total.Value)
+                           Invoice = i.InvoiceId,
+                           Date = i.InvoiceDate.Date,
+                           InvoiceTotal = i.InvoiceRecords!.Sum(l => l.Total!.Value)
                        };
 
-            return list.Average(l => l.Total);
+            var newlist = from i in list
+                          group i by i.Date into grp
+                          select new
+                          {
+                              Date = grp.Key,
+                              AverageTotal = grp.Average(l => l.InvoiceTotal)
+                          };
+
+            return await newlist.ToListAsync();
         }
 
-        public async Task<IEnumerable> BusiestHoursPerDay(DateTime date)
+        public async Task<IEnumerable> BusiestHoursPerDay(DateTime startDate, DateTime endDate)
         {
-            var invoiceList = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date == date).ToListAsync();
+            var invoiceList = await _repository.FindByCondition<Invoice>(l => l.InvoiceDate.Date >= startDate && l.InvoiceDate.Date <= endDate).ToListAsync();
             var list = from i in invoiceList
                        group i by i.InvoiceDate.Date into dg
                        select new
@@ -234,7 +243,7 @@ namespace Hms.Service
 
         public async Task<IEnumerable> InvoiceStatusReport()
         {
-            var invlist = await _repository.FindAll<Invoice>().ToListAsync();
+            var invlist = _repository.FindAll<Invoice>();
             var list = from i in invlist
                        group i by i.Status into sg
                        select new
@@ -242,19 +251,15 @@ namespace Hms.Service
                            InvoiceStatus = sg.Key,
                            InvoiceCount = sg.Count()
                        };
-            return list;
+            return await list.ToListAsync();
         }
 
         public async Task<IEnumerable> OrdersByCategory()
         {
-            var invRecList = await _repository.FindAll<InvoiceRecords>().ToListAsync();
-            var dishlist = await _repository.FindAll<Dish>().ToListAsync();
-            var categoryList = await _repository.FindAll<DishCategroy>().ToListAsync();
+            var invRecList = await _repository.FindAll<InvoiceRecords>().Include(l => l.Dish).Include(l => l.Dish!.DishCategroy).ToListAsync();
 
-            var list = from c in categoryList
-                       join d in dishlist on c.CategoryId equals d.DishCategroyId
-                       join i in invRecList on d.DishId equals i.DishId
-                       group i by c.Description into ls
+            var list = from c in invRecList
+                       group c by c.Dish!.DishCategroy!.Description into ls
                        select new
                        {
                            Category = ls.Key,
@@ -267,19 +272,15 @@ namespace Hms.Service
 
         public async Task<IEnumerable> OrdersByDishAndCategory()
         {
-            var invRecList = await _repository.FindAll<InvoiceRecords>().ToListAsync();
-            var dishlist = await _repository.FindAll<Dish>().ToListAsync();
-            var categoryList = await _repository.FindAll<DishCategroy>().ToListAsync();
+            var invRecList = await _repository.FindAll<InvoiceRecords>().Include(l=>l.Dish).Include(l=>l.Dish!.DishCategroy).ToListAsync();
 
-            var list = from c in categoryList
-                       join d in dishlist on c.CategoryId equals d.DishCategroyId
-                       group d by c.Description into ls
+            var list = from c in invRecList
+                       group c by c.Dish!.DishCategroy!.Description into ls
                        select new
                        {
-                           Catgory = ls.Key,
+                           Category = ls.Key,
                            Dishes = from l in ls
-                                    join i in invRecList on l.DishId equals i.DishId
-                                    group i by l.Name into lsn
+                                    group l by l.Dish!.Name into lsn
                                     select new
                                     {
                                         Dish = lsn.Key,
@@ -290,7 +291,7 @@ namespace Hms.Service
             return list;
         }
 
-        public async Task<IEnumerable> FeedbackCountByCategory()
+        public async Task<IEnumerable> FeedbackByRatings()
         {
             var feedbacklist = await _repository.FindAll<FeedBack>().ToListAsync();
             var list = from f in feedbacklist
@@ -306,11 +307,15 @@ namespace Hms.Service
     }
     public interface IReportService
     {
-        Task<double> GetIncomeForDate(DateTime date);
-        Task<int> VisitsPerDay(DateTime date);
-        Task<double> DishesServedPerDay(DateTime date);
-        Task<string> BusiestTablePerDate(DateTime date);
-        Task<IEnumerable> BusiestHoursPerDay(DateTime date);
+        Task<IEnumerable> GetIncomeForDate(DateTime startDate, DateTime endDate);
+        Task<int> VisitsPerDay(DateTime startDate, DateTime endDate);
+        Task<IEnumerable> VisitPerDay2(DateTime startDate, DateTime endDate);
+        Task<IEnumerable> DishesServedPerDay(DateTime startDate, DateTime endDate);
+        Task<IEnumerable> BusiestTablePerDate(DateTime startDate, DateTime endDate);
+        Task<IEnumerable> BusiestHoursPerDay(DateTime startDate, DateTime endDate);
+        Task<IEnumerable> MaxInvoiceBillPerDate(DateTime startDate, DateTime endDate);
+        Task<IEnumerable> MinInvoiceBillPerDate(DateTime startDate, DateTime endDate);
+        Task<IEnumerable> AvgInvoiceBillPerDate(DateTime startDate, DateTime endDate);
 
 
         Task<int> TotalNumberOfCustomerVisits();
@@ -322,11 +327,6 @@ namespace Hms.Service
         Task<IEnumerable> InvoiceStatusReport();
         Task<IEnumerable> OrdersByCategory();
         Task<IEnumerable> OrdersByDishAndCategory();
-        Task<IEnumerable> FeedbackCountByCategory();
-
-
-        Task<double> MaxInvoiceBillPerDate(DateTime date);
-        Task<double> MinInvoiceBillPerDate(DateTime date);
-        Task<double> AvgInvoiceBillPerDate(DateTime date);
+        Task<IEnumerable> FeedbackByRatings();
     }
 }

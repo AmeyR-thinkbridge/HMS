@@ -73,5 +73,27 @@ namespace HMS._1._0.Controllers
             }
             return BadRequest();
         }
-    }
+
+        [HttpPost("AddViaExcel")]
+
+        public async Task<IActionResult> AddViaExcel([FromForm] IFormFile file)
+        {
+            var list = await _dishCategoryService.ConvertExcelToList(file);
+            foreach(var item in list)
+            {
+                if(item.CategoryCode == null || item.Description == null)
+                {
+                    return BadRequest("Please check the excel for blank entries ");
+                }
+            }
+
+            var res = await _dishCategoryService.SaveRange(list);
+
+            if (res)
+            {
+                return Ok("File has been saved");
+            }
+            return BadRequest("Please check your excel again");
+        }
+}
 }

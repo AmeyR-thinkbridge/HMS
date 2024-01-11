@@ -18,5 +18,6 @@ namespace HMS.Data.Repository
         void Delete<T>(T entity) where T : class;
         void Save();
         Task SaveAsync();
+        Task SaveBulk<T>(List<T> entity) where T : class;
     }
 }

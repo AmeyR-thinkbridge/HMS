@@ -17,45 +17,50 @@ namespace HMS._1._0.Controllers
         }
 
         [HttpPost("IncomeByDate")]
-        public async Task<IActionResult> IncomeByDate([FromBody] DateTime date)
+        public async Task<IActionResult> IncomeByDate(DateTime starDate, DateTime endDate)
         {
-            date = date.Date;
-            var res = await _reportService.GetIncomeForDate(date);
+            starDate = starDate.Date;
+            endDate = endDate.Date;
+            var res = await _reportService.GetIncomeForDate(starDate, endDate);
 
             return Ok(res);
         }
 
         [HttpPost("VisitsPerDay")]
-        public async Task<IActionResult> VisitsPerDay([FromBody] DateTime date)
+        public async Task<IActionResult> VisitsPerDay(DateTime starDate, DateTime endDate)
         {
-            date = date.Date;
-            var res = await _reportService.VisitsPerDay(date);
+            starDate = starDate.Date;
+            endDate = endDate.Date;
+            var res = await _reportService.VisitsPerDay(starDate, endDate);
 
             return Ok(res);
         }
 
         [HttpPost("DishesServedPerDay")]
-        public async Task<IActionResult> DishesServedPerDay([FromBody] DateTime date)
+        public async Task<IActionResult> DishesServedPerDay(DateTime starDate, DateTime endDate)
         {
-            date = date.Date;
-            var res = await _reportService.DishesServedPerDay(date);
+            starDate = starDate.Date;
+            endDate = endDate.Date;
+            var res = await _reportService.DishesServedPerDay(starDate, endDate);
 
             return Ok(res);
         }
 
         [HttpPost("BusiestTablePerDate")]
-        public async Task<IActionResult> BusiestTablePerDate([FromBody] DateTime date)
+        public async Task<IActionResult> BusiestTablePerDate(DateTime starDate, DateTime endDate)
         {
-            date = date.Date;
-            var res = await _reportService.BusiestTablePerDate(date);
+            starDate = starDate.Date;
+            endDate = endDate.Date;
+            var res = await _reportService.BusiestTablePerDate(starDate, endDate);
 
             return Ok(res);
         }
         [HttpPost("BusiestHoursPerDay")]
-        public async Task<IEnumerable> BusiestHoursPerDay([FromBody] DateTime date)
+        public async Task<IEnumerable> BusiestHoursPerDay(DateTime starDate, DateTime endDate)
         {
-            date = date.Date;
-            var res = await _reportService.BusiestHoursPerDay(date);
+            starDate = starDate.Date;
+            endDate = endDate.Date;
+            var res = await _reportService.BusiestHoursPerDay(starDate, endDate);
 
             return res;
         }
@@ -106,7 +111,7 @@ namespace HMS._1._0.Controllers
         [HttpGet("InvoiceStatusReport")]
         public async Task<IEnumerable> InvoiceStatusReport()
         {
-           return await _reportService.InvoiceStatusReport();
+            return await _reportService.InvoiceStatusReport();
         }
 
         [HttpGet("OrdersByCategory")]
@@ -124,32 +129,46 @@ namespace HMS._1._0.Controllers
         [HttpGet("FeedbackCountByCategory")]
         public async Task<IEnumerable> FeedbackCountByCategory()
         {
-            return await _reportService.FeedbackCountByCategory();
+            return await _reportService.FeedbackByRatings();
         }
 
         [HttpPost("MaxInvoiceBillPerDate")]
-        public async Task<IActionResult> MaxInvoiceBillPerDate([FromBody] DateTime date)
+        public async Task<IActionResult> MaxInvoiceBillPerDate(DateTime starDate, DateTime endDate)
         {
-            date = date.Date;
-            var res = await _reportService.MaxInvoiceBillPerDate(date);
+            starDate = starDate.Date;
+            endDate = endDate.Date;
+            var res = await _reportService.MaxInvoiceBillPerDate(starDate, endDate);
 
             return Ok(res);
         }
 
         [HttpPost("MinInvoiceBillPerDate")]
-        public async Task<IActionResult> MinInvoiceBillPerDate([FromBody] DateTime date)
+        public async Task<IActionResult> MinInvoiceBillPerDate(DateTime starDate, DateTime endDate)
         {
-            date = date.Date;
-            var res = await _reportService.MinInvoiceBillPerDate(date);
+            starDate = starDate.Date;
+            endDate = endDate.Date;
+            var res = await _reportService.MinInvoiceBillPerDate(starDate, endDate);
 
             return Ok(res);
         }
 
         [HttpPost("AvgInvoiceBillPerDate")]
-        public async Task<IActionResult> AvgInvoiceBillPerDate([FromBody] DateTime date)
+        public async Task<IActionResult> AvgInvoiceBillPerDate(DateTime starDate, DateTime endDate)
         {
-            date = date.Date;
-            var res = await _reportService.AvgInvoiceBillPerDate(date);
+            starDate = starDate.Date;
+            endDate = endDate.Date;
+            var res = await _reportService.AvgInvoiceBillPerDate(starDate, endDate);
+
+            return Ok(res);
+        }
+
+        [HttpPost("VisitPerDay2")]
+        public async Task<IActionResult> VisitPerDay2(DateTime startdate, DateTime endDate)
+        {
+            startdate = startdate.Date;
+            endDate = endDate.Date;
+
+            var res = await _reportService.VisitPerDay2(startdate, endDate);
 
             return Ok(res);
         }

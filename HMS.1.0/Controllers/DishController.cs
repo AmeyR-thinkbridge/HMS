@@ -2,6 +2,7 @@
 using Hms.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml.DataValidation;
 
 namespace HMS._1._0.Controllers
 {
@@ -74,6 +75,23 @@ namespace HMS._1._0.Controllers
             {
                 return Ok($"Dish is deleted");
             }
+            return BadRequest();
+        }
+
+        [HttpPost("GetDishByCustomSearch")]
+        public async Task<IActionResult> GetDishByCustomSearch(DishSearchViewModel dishSearchViewModel)
+        {
+            var dishlist = await _dishService.GetDishesByConstraints(dishSearchViewModel);
+            if(dishSearchViewModel.IsExcel == null || !(bool)dishSearchViewModel.IsExcel)
+            {
+                return Ok(dishlist);
+            }
+            if (dishlist is MemoryStream)
+            {
+                string excelName = $"DishList-{DateTime.Now.ToShortTimeString()}.xslx";
+                return File(dishlist, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
+            }
+
             return BadRequest();
         }
     }
